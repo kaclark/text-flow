@@ -6,3 +6,5 @@ https://developers.google.com/docs/api/how-tos/overview
 
 Overview of the structure of a google doc file:
 https://developers.google.com/docs/api/concepts/structure
+
+Oauth stuff has to be set up. Json credentials must be downloaded and added to directory.
