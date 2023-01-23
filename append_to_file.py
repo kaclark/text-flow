@@ -8,11 +8,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-import sys
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-f")
+(options, args) = parser.parse_args()
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/documents']
-
 
 def check_cred():
     """Shows basic usage of the Docs API.
@@ -37,7 +40,7 @@ def check_cred():
             token.write(creds.to_json())
     return creds
 
-def main():
+def append_text(in_text):
     """Shows basic usage of the Docs API.
     Prints the title of a sample document.
     """
@@ -61,25 +64,27 @@ def main():
 
     try:
         service = build('docs', 'v1', credentials=creds)
-
-        # Retrieve the documents contents from the Docs service.
-        #document = service.documents().get(documentId=DOCUMENT_ID).execute()
-
-        #print('The title of the document is: {}'.format(document.get('title')))
+        
+        #insert string at end of google doc
         requests = [
             {
               'insertText': {
-                'text': sys.argv[1] + '\n',
+                'text': in_text + '\n',
                 'endOfSegmentLocation': {}
               }
             }
         ]
 
         result = service.documents().batchUpdate(
-            documentId=sys.argv[2], body={'requests': requests}).execute()
+            documentId=options.f, body={'requests': requests}).execute()
 
     except HttpError as err:
         print(err)
 
-if __name__ == '__main__':
-    main()
+#open post queue
+with open("./tmp/post_queue.txt", "r") as pq_in:
+    posts = [l.split('\n')[0] for l in pq_in.readlines()]
+
+#append posts to document
+for post in posts:
+    append_text(post)
